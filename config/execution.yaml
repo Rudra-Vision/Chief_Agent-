@@ -1,0 +1,184 @@
+# =============================================================================
+# EXECUTION CONFIGURATION
+# Execution is strictly SEPARATE from signal generation.
+# Every lifecycle transition is logged and persisted.
+# =============================================================================
+
+lifecycle:
+  states:
+    - SIGNAL
+    - RISK_CHECK
+    - ORDER_INTENT
+    - VALIDATION
+    - BROKER_ORDER
+    - ACKNOWLEDGEMENT
+    - FILL
+    - POSITION
+    - PROTECTION_PLACED
+    - EXIT
+    - RECONCILIATION
+    - JOURNAL
+  terminal_states: ["JOURNAL", "CANCELLED", "REJECTED", "EXPIRED"]
+  persist_every_transition: true
+
+# ------------------------------------------------------------------ idempotency
+idempotency:
+  enabled: true
+  key_fields: ["strategy_version", "trade_id", "signal_id", "order_id"]
+  # Every broker order carries a deterministic tag: CHIEF-<trade_id>-<leg>
+  tag_template: "CHIEF-{trade_id}-{leg}"
+  max_tag_length: 40
+  require_unique_signal_id: true
+  dedupe_window_seconds: 300
+  # Distinguish "never reached the broker" from "broker may have accepted it".
+  uncertain_outcomes:
+    - "timeout"
+    - "connection_reset"
+    - "5xx"
+    - "read_timeout"
+  uncertain_action:
+    reconcile_first: true
+    max_reconcile_attempts: 3
+    reconcile_backoff_seconds: [1, 3, 8]
+    never_blind_resend: true
+
+# -------------------------------------------------------------------- retries
+retries:
+  max_attempts: 2
+  backoff_seconds: [0.5, 1.5]
+  retry_on: ["429", "500", "502", "503", "504", "timeout"]
+  do_not_retry_on: ["400", "401", "403", "422", "UDAPI1004", "UDAPI1006", "UDAPI1026"]
+  respect_rate_limit_headers: true
+
+# ------------------------------------------------------- paper-trading simulator
+paper:
+  # Simulates orders, latency, slippage, spread, partial fills and stops.
+  initial_capital: 500000
+  latency:
+    submit_ms_mean: 120
+    submit_ms_stddev: 45
+    ack_ms_mean: 80
+    ack_ms_stddev: 30
+  fills:
+    market_order_slippage_bps: 4
+    limit_order_fill_probability: 0.85      # needs price to trade through
+    partial_fill_probability: 0.15
+    partial_fill_fraction_range: [0.3, 0.8]
+    rejection_probability: 0.002
+    reject_reasons: ["INSUFFICIENT_FUNDS", "PRICE_OUT_OF_CIRCUIT", "RMS_BLOCKED"]
+    stop_trigger_slippage_bps: 8
+    gap_through_stop_slippage_bps: 25
+  spread:
+    default_bps: 6
+    min_ticks: 1
+  costs_from_config: "execution.costs"
+
+# ------------------------------------------------------------- order execution
+entry:
+  # Entry is separated from protection placement so a failed stop cannot leave a
+  # naked position: the stop order is submitted immediately after the fill.
+  place_stop_first_when_possible: true
+  cancel_unfilled_entry_after_seconds: 20
+  convert_to_market_after_seconds: 10
+  max_chase_ticks: 8
+  skip_if_price_moved_bps: 25
+
+protection:
+  require_stop: true
+  stop_order_type: "SL-M"
+  place_target_as_limit: true
+  use_gtt_for_swing: false
+  gtt_only_in_live: true
+  verify_protection_after_seconds: 5
+  unprotect_position_action: "flatten_immediately"
+
+exit:
+  square_off_before_close_minutes: 10
+  square_off_retry_attempts: 3
+  square_off_escalate_to_market: true
+  partial_exit_supported: true
+  exit_uses_limit_then_market: true
+
+# ------------------------------------------------------------ reconciliation
+reconciliation:
+  interval_seconds: 15
+  on_mismatch:
+    action: "halt_new_entries"
+    alert: true
+    enter_mode: "RECONCILIATION"
+    auto_heal_positions_we_know: true
+    never_auto_heal_unknown_client_positions: true
+  compare_fields: ["instrument_key", "quantity", "product", "direction"]
+  quantity_tolerance: 0
+  log_every_cycle: false
+
+# --------------------------------------------------------------- slippage monitor
+slippage:
+  enabled: true
+  rolling_window_trades: 50
+  warn_bps: 25
+  reduce_size_bps: 40
+  suspend_strategy_bps: 60
+  track_dimensions: ["symbol", "time_bucket", "order_type", "volatility_regime", "size_bucket"]
+
+# ------------------------------------------------------------------ costs model
+# Indian equity intraday charges. ALL configurable - charges change over time.
+# Verify against the latest exchange/broker schedule before going live.
+costs:
+  currency: "INR"
+  brokerage:
+    model: "percentage_or_cap"
+    pct: 0.0003                 # 0.03%
+    cap_per_order: 20.0         # Rs 20 per executed order
+    delivery_pct: 0.0
+    delivery_cap_per_order: 20.0
+  stt:
+    intraday_sell_pct: 0.00025  # 0.025% on the sell side (intraday equity)
+    delivery_buy_and_sell_pct: 0.001
+    futures_sell_pct: 0.000125
+    options_sell_pct: 0.000625
+  exchange_transaction_charge:
+    nse_equity_pct: 0.0000297   # 0.00297%
+    nse_futures_pct: 0.0000173
+    nse_options_pct: 0.0003503
+    bse_equity_pct: 0.0000375
+  sebi_turnover_fee_pct: 0.000001
+  gst_pct: 0.18                 # on brokerage + exchange txn + SEBI fees
+  stamp_duty:
+    equity_intraday_buy_pct: 0.00003
+    equity_delivery_buy_pct: 0.00015
+    futures_buy_pct: 0.00002
+    options_buy_pct: 0.00003
+  dp_charges:
+    delivery_sell_per_scrip: 13.5
+  slippage:
+    default_bps: 4
+    stop_exit_bps: 10
+    volatility_scaled: true
+    volatility_scaling_factor: 0.6
+  apply_costs_in_backtest: true    # backtesting without realistic costs is prohibited
+
+# --------------------------------------------------------------- market schedule
+schedule:
+  timezone: "Asia/Kolkata"
+  pre_open_start: "09:00"
+  normal_open: "09:15"
+  normal_close: "15:30"
+  closing_auction_start: "15:15"
+  square_off_deadline: "15:20"
+  # Use the official exchange status/timings API when available; fall back to
+  # these defaults only if the API is unreachable.
+  use_exchange_status_api: true
+  use_market_timings_api: true
+  freshness_days_for_holiday_cache: 7
+
+# --------------------------------------------------------------------- safety
+safety:
+  # Live order placement has a hard human confirmation requirement for the
+  # first N live orders of each session.
+  confirm_first_live_orders_per_session: 3
+  max_notional_per_order_pct_of_equity: 0.25
+  max_orders_per_minute: 6
+  refuse_order_if_preflight_stale_seconds: 120
+  refuse_order_if_data_safe_mode: true
+  refuse_order_if_reconciliation_pending: true

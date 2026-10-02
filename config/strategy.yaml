@@ -1,0 +1,179 @@
+# =============================================================================
+# STRATEGY CONFIGURATION
+# Family: REGIME-FILTERED, SECTOR-CONFIRMED ORB BREAKOUT + RETEST
+#         with VWAP and VOLUME confirmation.
+#
+# This file defines the CURRENT CHAMPION parameters. The champion is immutable
+# once published - the research engine creates CHALLENGERS instead of editing
+# this file in place (see research.yaml).
+# =============================================================================
+
+champion:
+  strategy_family: "orb_vwap_retest"
+  version: "ORB_v1.0.0"
+  published_at: null            # filled in when the version is registered
+  parent_version: null
+  reason: "Baseline interpretable strategy family. No optimisation applied."
+
+# ---------------------------------------------------------------- opening range
+opening_range:
+  # Only ONE of these is active at a time. The research engine may propose
+  # changing `duration_minutes`; it must never sweep all of them at once.
+  duration_minutes: 15
+  candidates: [5, 10, 15, 20, 30]
+  build_from_timeframe: "1m"    # verified 1-minute data, aggregated up
+  require_complete_candles: true
+  # Derived quantities: OR high, OR low, OR midpoint, OR width, and the OR width
+  # as a fraction of a TYPICAL SESSION RANGE (the 20-session average of
+  # high - low). Measured empirically, a 15-minute opening range is usually
+  # 0.12-0.30 of a full session's range in liquid NSE names; a value above ~0.6
+  # means the day has already made its move inside the opening range.
+  min_or_width_atr_fraction: 0.10
+  max_or_width_atr_fraction: 0.80
+  max_or_high_low_reversal_pct: 0.02
+
+# ---------------------------------------------------------------- entry filters
+long:
+  enabled: true
+  breakout_type: "close_above_or_high"     # or "touch_above_or_high"
+  require_close_above_or_high: true
+  breakout_margin_atr_fraction: 0.05       # avoid hair-trigger fills
+  require_above_vwap: true
+  min_vwap_distance_pct: 0.0005
+  min_rvol: 1.20                           # <-- classic research lever
+  min_relative_strength_vs_index: 0.0      # stock return minus NIFTY return
+  allowed_regimes: ["TREND_UP", "RANGE", "LOW_VOLATILITY"]
+  require_sector_rank_at_least: 6          # top-6 strongest sectors of the day
+  require_sector_above_vwap: true
+  require_index_above_vwap: false          # candidate research lever
+  require_retest: false                    # candidate research lever
+  require_confirmation_candle: true
+  max_spread_pct: 0.0035
+  max_gap_pct: 0.03
+  # ATR thresholds are expressed against the SESSION-scaled ATR% ("daily ATR"),
+  # i.e. per-bar ATR scaled by sqrt(bars per session). 0.5% is very quiet,
+  # 7% is unusually wild for an NSE large cap.
+  min_atr_pct: 0.005
+  max_atr_pct: 0.07
+  entry_window_start_minutes: 15           # earliest entry, minutes after open
+  entry_window_end_minutes: 210            # 12:45 IST - no late chase
+  avoid_last_minutes_of_session: 30
+  min_opportunity_score: 55
+
+short:
+  enabled: true                            # intraday shorting of NSE equities is
+                                           # permitted for MIS/I product; the risk
+                                           # engine still governs exposure.
+  breakout_type: "close_below_or_low"
+  require_close_below_or_low: true
+  breakout_margin_atr_fraction: 0.05
+  require_below_vwap: true
+  min_vwap_distance_pct: 0.0005
+  min_rvol: 1.20
+  max_relative_strength_vs_index: 0.0
+  allowed_regimes: ["TREND_DOWN", "RANGE", "LOW_VOLATILITY"]
+  require_sector_rank_at_most: null        # null = no constraint by default
+  require_sector_below_vwap: true
+  require_index_below_vwap: false
+  require_retest: false
+  require_confirmation_candle: true
+  max_spread_pct: 0.0035
+  max_gap_pct: 0.03
+  # See the note on the long side: these are session-scaled ("daily") ATR%.
+  min_atr_pct: 0.005
+  max_atr_pct: 0.07
+  entry_window_start_minutes: 15
+  entry_window_end_minutes: 210
+  avoid_last_minutes_of_session: 30
+  min_opportunity_score: 55
+
+# ------------------------------------------------------------------ stop models
+stops:
+  model: "orb_structural"                  # orb_structural | atr | swing | pct
+  atr_period: 14
+  atr_multiplier: 1.5
+  swing_lookback: 10
+  pct_stop: 0.012
+  # Structural stop: below OR low for longs (above OR high for shorts),
+  # tightened by a buffer expressed as a fraction of ATR.
+  structural_buffer_atr: 0.25
+  max_stop_distance_pct: 0.05
+  min_stop_distance_pct: 0.003
+
+trailing:
+  enabled: true
+  model: "atr"                             # atr | r_multiple | swing | none
+  atr_multiplier: 2.0
+  breakeven_after_r: 1.0                   # move stop to entry at +1R
+  trail_activation_r: 1.0
+  r_multiple_step: 0.5
+  swing_lookback: 5
+  use_broker_side_gtt: true                # prefer exchange-resident protection
+
+targets:
+  model: "risk_multiple"                   # risk_multiple | structure | atr
+  r_multiple_t1: 1.5
+  r_multiple_t2: 2.5
+  book_partial_at_t1_pct: 50               # scale out half at T1
+  move_stop_to_breakeven_on_t1: true
+  min_risk_reward_for_entry: 1.5
+
+# ------------------------------------------------------------------ exit rules
+exits:
+  force_square_off_minutes_before_close: 10   # 15:20 IST for a 15:30 close
+  exit_on_regime_flip: false                  # candidate research lever
+  # VWAP is an ENTRY confirmation filter in this strategy family, not a primary
+  # exit. Turning it into an exit was tested and produced heavy churn: 37 of 67
+  # trades closed on a VWAP cross with a negative average R.
+  exit_on_vwap_cross_against: false
+  time_stop_minutes: 240                      # stale trade -> exit at market
+  exit_on_news_adverse: true
+
+# ------------------------------------------------------------------- indicators
+indicators:
+  vwap_session_reset: true
+  atr_period: 14
+  ema_fast: 9
+  ema_slow: 21
+  rsi_period: 14
+  rvol_lookback_days: 20
+  rvol_same_time_window_minutes: 60
+  adx_period: 14
+  adx_trend_threshold: 20
+
+# ------------------------------------------------------------- opportunity score
+# The score is DETERMINISTIC. An LLM never produces or edits it.
+# Weights may be tuned only through the controlled research process.
+opportunity_score:
+  weights:
+    trend_quality: 0.16
+    orb_quality: 0.16
+    vwap_confirmation: 0.10
+    volume_confirmation: 0.12
+    sector_strength: 0.12
+    market_regime: 0.10
+    relative_strength: 0.10
+    liquidity: 0.06
+    risk_reward: 0.06
+    spread_quality: 0.02
+  scale: 100
+
+# ------------------------------------------------------------- no-trade conditions
+# Any single hit here vetoes the trade, regardless of score.
+no_trade:
+  low_liquidity: true
+  large_spread: true
+  extreme_gap: true
+  stale_feed: true
+  extreme_vix_unless_validated: true
+  abnormal_volatility: true
+  near_price_circuit: true
+  data_error: true
+  broker_unstable: true
+  low_confidence: true
+  daily_loss_limit_reached: true
+  drawdown_limit_reached: true
+  risk_engine_unavailable: true
+  vix_block_above: 30.0
+  vix_block_below: 8.0
+  circuit_band_block_pct: 0.02          # within 2% of a circuit limit -> skip

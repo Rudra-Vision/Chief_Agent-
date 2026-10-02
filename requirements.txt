@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# Chief Agent - Python dependencies
+#
+# Pinned to lower bounds rather than exact versions so a fresh install works on
+# Python 3.11 / 3.12 / 3.13. Run `pip install -r requirements.txt`.
+# ---------------------------------------------------------------------------
+
+# --- web framework / API -----------------------------------------------------
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+itsdangerous>=2.1
+
+# --- configuration & validation ---------------------------------------------
+pydantic>=2.6
+pydantic-settings>=2.2
+PyYAML>=6.0
+python-dotenv>=1.0
+
+# --- http / async ------------------------------------------------------------
+httpx>=0.27
+websockets>=12.0
+requests>=2.31
+
+# --- protobuf (Upstox Market Data Feed V3 is protobuf-encoded) --------------
+protobuf>=4.25
+
+# --- data & analytics --------------------------------------------------------
+numpy>=1.26
+pandas>=2.2
+scipy>=1.11
+scikit-learn>=1.4
+
+# --- persistence -------------------------------------------------------------
+SQLAlchemy>=2.0
+alembic>=1.13
+# Uncomment for PostgreSQL deployments:
+# psycopg[binary]>=3.1
+
+# --- scheduling --------------------------------------------------------------
+APScheduler>=3.10
+
+# --- optional: faster frames -------------------------------------------------
+# polars>=1.0
+
+# --- testing -----------------------------------------------------------------
+pytest>=8.0
+pytest-asyncio>=0.23

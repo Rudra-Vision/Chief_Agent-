@@ -1,0 +1,70 @@
+# =============================================================================
+# RISK CONFIGURATION  --  The risk engine has ABSOLUTE authority.
+# Nothing in the system (including the AI research layer) may override these.
+# All percentages are fractions of account equity unless stated otherwise.
+# =============================================================================
+
+per_trade:
+  # Default PAPER risk. Deliberately tiny: this is an experimental system.
+  risk_pct: 0.0025            # 0.25% of account equity per trade
+  max_risk_pct: 0.005         # 0.5% hard ceiling - the UI cannot set more
+  min_stop_distance_pct: 0.002
+  max_stop_distance_pct: 0.06
+  min_risk_reward: 1.5        # a signal needs at least 1:1.5 to be considered
+  rounding: "down"            # always round quantity DOWN to lot/tick rules
+
+portfolio:
+  max_simultaneous_positions: 3
+  max_correlated_sector_positions: 2
+  max_total_open_risk_pct: 0.0075   # 0.75% aggregate open risk
+  max_gross_exposure_pct: 1.0       # no leverage by default
+  max_single_position_exposure_pct: 0.25
+  max_same_direction_positions: 3
+
+daily_limits:
+  soft_daily_stop_pct: -0.010       # -1.0%: no new entries
+  hard_daily_stop_pct: -0.015       # -1.5%: flatten + engage kill switch
+  max_trades_per_day: 12
+  max_order_attempts_per_day: 60
+  max_consecutive_losses: 4         # stop trading for the day
+  max_consecutive_rejections: 3     # broker rejections -> halt + alert
+  weekly_drawdown_warning_pct: -0.025
+
+strategy_suspension:
+  max_strategy_drawdown_pct: -0.05  # suspend a strategy version at -5%
+  min_trades_before_evaluation: 20
+  slippage_halt_bps: 60             # median slippage above 60bp -> suspend
+  suspension_cooldown_hours: 24
+
+data_quality:
+  # If market data is unreliable, DO NOT TRADE. Enter DATA_SAFE_MODE.
+  stale_quote_seconds: 5.0
+  max_missing_candle_pct: 0.02
+  max_duplicate_candle_pct: 0.001
+  max_spread_pct: 0.004             # 40bp spread ceiling for entry
+  min_average_daily_volume: 200000  # shares - liquidity floor
+  min_average_daily_turnover_inr: 50000000
+  max_gap_pct_for_entry: 0.03       # extreme opening gap -> skip
+  min_atr_pct: 0.004
+  max_atr_pct: 0.09
+  max_out_of_order_ticks: 5
+  websocket_reconnect_grace_seconds: 30
+
+order_protections:
+  forbid_averaging_down: true
+  forbid_martingale: true
+  forbid_adding_to_losers: true
+  require_stop_before_entry: true
+  require_broker_side_stop: true    # prefer SL-M / GTT at the exchange
+  max_retries_per_order: 2
+  retry_backoff_seconds: [0.5, 1.5, 4.0]
+  uncertain_order_action: "reconcile"   # never blind-resend
+
+fail_safe:
+  # Trading software fails CLOSED, not open.
+  risk_engine_unavailable: "no_new_orders"
+  quote_stale: "no_new_orders"
+  unknown_position: "no_new_orders"
+  broker_response_uncertain: "reconcile_before_retry"
+  database_unavailable: "halt_all"
+  position_mismatch: "halt_entries_and_alert"
