@@ -1,0 +1,306 @@
+# Bootstrap watchlist of highly liquid NSE equities.
+#
+# IMPORTANT: this file contains SYMBOLS ONLY, never instrument keys or ISINs.
+# Upstox instrument_key values (e.g. "NSE_EQ|INE002A01018") are resolved at
+# runtime by joining these symbols against the official Upstox BOD instrument
+# master:  https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz
+# Nothing here is invented market data - it is a user-editable starting list.
+#
+# tier 1 = NIFTY 50 / NIFTY NEXT 50 scale large caps (primary trading universe)
+# tier 2 = additional highly liquid F&O-eligible large/mid caps (wider scan)
+#
+# Refresh or edit freely: Universe -> Edit watchlist in the dashboard.
+symbol,name,sector,tier
+ADANIENT,Adani Enterprises Ltd,Consumer Services,1
+ADANIPORTS,Adani Ports and Special Economic Zone Ltd,Consumer Services,1
+APOLLOHOSP,Apollo Hospitals Enterprise Ltd,Healthcare,1
+ASIANPAINT,Asian Paints Ltd,Consumer Durables,1
+AXISBANK,Axis Bank Ltd,Financial Services,1
+BAJAJ-AUTO,Bajaj Auto Ltd,Automobile,1
+BAJAJFINSV,Bajaj Finserv Ltd,Financial Services,1
+BAJFINANCE,Bajaj Finance Ltd,Financial Services,1
+BEL,Bharat Electronics Ltd,Industrial Manufacturing,1
+BHARTIARTL,Bharti Airtel Ltd,Telecommunication,1
+BRITANNIA,Britannia Industries Ltd,Fast Moving Consumer Goods,1
+CIPLA,Cipla Ltd,Healthcare,1
+COALINDIA,Coal India Ltd,Energy,1
+DIVISLAB,Divis Laboratories Ltd,Healthcare,1
+DRREDDY,Dr Reddys Laboratories Ltd,Healthcare,1
+EICHERMOT,Eicher Motors Ltd,Automobile,1
+GRASIM,Grasim Industries Ltd,Cement,1
+HCLTECH,HCL Technologies Ltd,Information Technology,1
+HDFCBANK,HDFC Bank Ltd,Financial Services,1
+HDFCLIFE,HDFC Life Insurance Company Ltd,Financial Services,1
+HEROMOTOCO,Hero MotoCorp Ltd,Automobile,1
+HINDALCO,Hindalco Industries Ltd,Metals,1
+HINDUNILVR,Hindustan Unilever Ltd,Fast Moving Consumer Goods,1
+ICICIBANK,ICICI Bank Ltd,Financial Services,1
+INDUSINDBK,IndusInd Bank Ltd,Financial Services,1
+INFY,Infosys Ltd,Information Technology,1
+ITC,ITC Ltd,Fast Moving Consumer Goods,1
+JSWSTEEL,JSW Steel Ltd,Metals,1
+KOTAKBANK,Kotak Mahindra Bank Ltd,Financial Services,1
+LT,Larsen & Toubro Ltd,Construction,1
+M&M,Mahindra & Mahindra Ltd,Automobile,1
+MARUTI,Maruti Suzuki India Ltd,Automobile,1
+NESTLEIND,Nestle India Ltd,Fast Moving Consumer Goods,1
+NTPC,NTPC Ltd,Power,1
+ONGC,Oil and Natural Gas Corporation Ltd,Energy,1
+POWERGRID,Power Grid Corporation of India Ltd,Power,1
+RELIANCE,Reliance Industries Ltd,Energy,1
+SBILIFE,SBI Life Insurance Company Ltd,Financial Services,1
+SBIN,State Bank of India,Financial Services,1
+SHRIRAMFIN,Shriram Finance Ltd,Financial Services,1
+SUNPHARMA,Sun Pharmaceutical Industries Ltd,Healthcare,1
+TATACONSUM,Tata Consumer Products Ltd,Fast Moving Consumer Goods,1
+TATAMOTORS,Tata Motors Ltd,Automobile,1
+TATASTEEL,Tata Steel Ltd,Metals,1
+TCS,Tata Consultancy Services Ltd,Information Technology,1
+TECHM,Tech Mahindra Ltd,Information Technology,1
+TITAN,Titan Company Ltd,Consumer Services,1
+TRENT,Trent Ltd,Consumer Services,1
+ULTRACEMCO,UltraTech Cement Ltd,Cement,1
+WIPRO,Wipro Ltd,Information Technology,1
+ABB,ABB India Ltd,Industrial Manufacturing,2
+ABCAPITAL,Aditya Birla Capital Ltd,Financial Services,2
+ACC,ACC Ltd,Cement,2
+ADANIENSOL,Adani Energy Solutions Ltd,Power,2
+ADANIGREEN,Adani Green Energy Ltd,Power,2
+ADANIPOWER,Adani Power Ltd,Power,2
+AEGISLOG,Aegis Logistics Ltd,Energy,2
+ALKEM,Alkem Laboratories Ltd,Healthcare,2
+AMBUJACEM,Ambuja Cements Ltd,Cement,2
+ANGELONE,Angel One Ltd,Financial Services,2
+ANURAS,Anupam Rasayan India Ltd,Chemicals,2
+APLAPOLLO,APL Apollo Tubes Ltd,Metals,2
+APOLLOTYRE,Apollo Tyres Ltd,Automobile,2
+ARVIND,Arvind Ltd,Textiles,2
+ASHOKLEY,Ashok Leyland Ltd,Automobile,2
+ASTERDM,Aster DM Healthcare Ltd,Healthcare,2
+ASTRAMICRO,Astra Microwave Products Ltd,Industrial Manufacturing,2
+ATGL,Adani Total Gas Ltd,Energy,2
+AUBANK,AU Small Finance Bank Ltd,Financial Services,2
+AUROPHARMA,Aurobindo Pharma Ltd,Healthcare,2
+BAJAJHLDNG,Bajaj Holdings and Investment Ltd,Financial Services,2
+BALAJICHEM,Balaji Amines Ltd,Chemicals,2
+BALRAMCHIN,Balrampur Chini Mills Ltd,Fast Moving Consumer Goods,2
+BANDHANBNK,Bandhan Bank Ltd,Financial Services,2
+BANKBARODA,Bank of Baroda,Financial Services,2
+BANKINDIA,Bank of India,Financial Services,2
+BATAINDIA,Bata India Ltd,Consumer Durables,2
+BERGEPAINT,Berger Paints India Ltd,Consumer Durables,2
+BHARATFORG,Bharat Forge Ltd,Automobile,2
+BHARATGEAR,Bharat Gears Ltd,Automobile,2
+BHEL,Bharat Heavy Electricals Ltd,Industrial Manufacturing,2
+BIOCON,Biocon Ltd,Healthcare,2
+BIRLACORPN,Birla Corporation Ltd,Cement,2
+BLUESTAR,Blue Star Ltd,Consumer Durables,2
+BOSCHLTD,Bosch Ltd,Automobile,2
+BPCL,Bharat Petroleum Corporation Ltd,Energy,2
+BRIGADE,Brigade Enterprises Ltd,Realty,2
+CAMSFINE,Computer Age Management Services Ltd,Financial Services,2
+CANBK,Canara Bank,Financial Services,2
+CANFINHOME,Can Fin Homes Ltd,Financial Services,2
+CDSL,Central Depository Services India Ltd,Financial Services,2
+CEATLTD,CEAT Ltd,Automobile,2
+CENTRALBK,Central Bank of India,Financial Services,2
+CESC,CESC Ltd,Power,2
+CHALET,Chalet Hotels Ltd,Consumer Services,2
+CHENNPETRO,Chennai Petroleum Corporation Ltd,Energy,2
+CHOLAFIN,Cholamandalam Investment and Finance Co Ltd,Financial Services,2
+CLEAN,Clean Science and Technology Ltd,Chemicals,2
+COCHINSHIP,Cochin Shipyard Ltd,Industrial Manufacturing,2
+COFORGE,Coforge Ltd,Information Technology,2
+COLPAL,Colgate Palmolive India Ltd,Fast Moving Consumer Goods,2
+CONCOR,Container Corporation of India Ltd,Logistics,2
+CRISIL,CRISIL Ltd,Financial Services,2
+CUMMINSIND,Cummins India Ltd,Industrial Manufacturing,2
+DABUR,Dabur India Ltd,Fast Moving Consumer Goods,2
+DALMIACEM,Dalmia Bharat Ltd,Cement,2
+DATAPATTNS,Data Patterns India Ltd,Industrial Manufacturing,2
+DECCAN,Deccan Cements Ltd,Cement,2
+DEEPAKNTR,Deepak Nitrite Ltd,Chemicals,2
+DELHIVERY,Delhivery Ltd,Logistics,2
+DEVYANI,Devyani International Ltd,Consumer Services,2
+DLF,DLF Ltd,Realty,2
+DMART,Avenue Supermarts Ltd,Consumer Services,2
+DODLA,Dodla Dairy Ltd,Fast Moving Consumer Goods,2
+EIDPARRY,EID Parry India Ltd,Fast Moving Consumer Goods,2
+EIHOTEL,EIH Ltd,Consumer Services,2
+EMAMILTD,Emami Ltd,Fast Moving Consumer Goods,2
+ENDURANCE,Endurance Technologies Ltd,Automobile,2
+FEDERALBNK,Federal Bank Ltd,Financial Services,2
+FINEORG,Fine Organic Industries Ltd,Chemicals,2
+FORCEMOT,Force Motors Ltd,Automobile,2
+FORTIS,Fortis Healthcare Ltd,Healthcare,2
+GAIL,GAIL India Ltd,Energy,2
+GALAXYSURF,Galaxy Surfactants Ltd,Chemicals,2
+GANDHITUBE,Gandhi Special Tubes Ltd,Metals,2
+GICRE,General Insurance Corporation of India,Financial Services,2
+GLAND,Gland Pharma Ltd,Healthcare,2
+GMRINFRA,GMR Airports Infrastructure Ltd,Construction,2
+GODREJCP,Godrej Consumer Products Ltd,Fast Moving Consumer Goods,2
+GODREJPROP,Godrej Properties Ltd,Realty,2
+GOKEX,Gokaldas Exports Ltd,Textiles,2
+GRSE,Garden Reach Shipbuilders and Engineers Ltd,Industrial Manufacturing,2
+GUJGASLTD,Gujarat Gas Ltd,Energy,2
+HAL,Hindustan Aeronautics Ltd,Industrial Manufacturing,2
+HATSUN,Hatsun Agro Product Ltd,Fast Moving Consumer Goods,2
+HAVELLS,Havells India Ltd,Consumer Durables,2
+HCG,Healthcare Global Enterprises Ltd,Healthcare,2
+HEIDELBERG,Heidelberg Materials India Ltd,Cement,2
+HERITGFOOD,Heritage Foods Ltd,Fast Moving Consumer Goods,2
+HFCL,HFCL Ltd,Telecommunication,2
+HIMATSEIDE,Himatsingka Seide Ltd,Textiles,2
+HINDCOPPER,Hindustan Copper Ltd,Metals,2
+HINDZINC,Hindustan Zinc Ltd,Metals,2
+HOMEFIRST,Home First Finance Company India Ltd,Financial Services,2
+HPCL,Hindustan Petroleum Corporation Ltd,Energy,2
+ICICIGI,ICICI Lombard General Insurance Co Ltd,Financial Services,2
+ICICIPRULI,ICICI Prudential Life Insurance Co Ltd,Financial Services,2
+ICICISECU,ICICI Securities Ltd,Financial Services,2
+IDFC,IDFC Ltd,Financial Services,2
+IDFCFIRSTB,IDFC First Bank Ltd,Financial Services,2
+IFCI,IFCI Ltd,Financial Services,2
+IGL,Indraprastha Gas Ltd,Energy,2
+INDHOTEL,Indian Hotels Company Ltd,Consumer Services,2
+INDIACEM,India Cements Ltd,Cement,2
+INDIANB,Indian Bank,Financial Services,2
+INDIGO,InterGlobe Aviation Ltd,Consumer Services,2
+INOXWIND,Inox Wind Ltd,Power,2
+IOB,Indian Overseas Bank,Financial Services,2
+IOC,Indian Oil Corporation Ltd,Energy,2
+IPCALAB,IPCA Laboratories Ltd,Healthcare,2
+IRB,IRB Infrastructure Developers Ltd,Construction,2
+IRCTC,Indian Railway Catering and Tourism Corp Ltd,Consumer Services,2
+IRFC,Indian Railway Finance Corporation Ltd,Financial Services,2
+JINDALSAW,Jindal SAW Ltd,Metals,2
+JINDALSTEL,Jindal Steel and Power Ltd,Metals,2
+JIOFIN,Jio Financial Services Ltd,Financial Services,2
+JKCEMENT,JK Cement Ltd,Cement,2
+JKTYRE,JK Tyre and Industries Ltd,Automobile,2
+JSWENERGY,JSW Energy Ltd,Power,2
+JUBLFOOD,Jubilant Foodworks Ltd,Consumer Services,2
+KALPATPOWR,Kalpataru Projects International Ltd,Construction,2
+KALYANKJIL,Kalyan Jewellers India Ltd,Consumer Services,2
+KEC,KEC International Ltd,Construction,2
+KEI,KEI Industries Ltd,Industrial Manufacturing,2
+KIMS,KIMS Ltd,Healthcare,2
+KIRIINDUS,Kiri Industries Ltd,Chemicals,2
+KPITTECH,KPIT Technologies Ltd,Information Technology,2
+LALPATHLAB,Dr Lal PathLabs Ltd,Healthcare,2
+LAURUSLABS,Laurus Labs Ltd,Healthcare,2
+LEMONTREE,Lemon Tree Hotels Ltd,Consumer Services,2
+LICHSGFIN,LIC Housing Finance Ltd,Financial Services,2
+LICI,Life Insurance Corporation of India,Financial Services,2
+LODHA,Macrotech Developers Ltd,Realty,2
+LTIM,LTIMindtree Ltd,Information Technology,2
+LUMAXTECH,Lumax Auto Technologies Ltd,Automobile,2
+LUPIN,Lupin Ltd,Healthcare,2
+MAHABANK,Bank of Maharashtra,Financial Services,2
+MAHINDCIE,Mahindra CIE Automotive Ltd,Automobile,2
+MAHSEAMLES,Maharashtra Seamless Ltd,Metals,2
+MANAPPURAM,Manappuram Finance Ltd,Financial Services,2
+MANKIND,Mankind Pharma Ltd,Healthcare,2
+MARICO,Marico Ltd,Fast Moving Consumer Goods,2
+MAXHEALTH,Max Healthcare Institute Ltd,Healthcare,2
+MAZDOCK,Mazagon Dock Shipbuilders Ltd,Industrial Manufacturing,2
+MEDANTA,Global Health Ltd,Healthcare,2
+METROPOLIS,Metropolis Healthcare Ltd,Healthcare,2
+MGL,Mahanagar Gas Ltd,Energy,2
+MOIL,MOIL Ltd,Metals,2
+MOTHERSON,Samvardhana Motherson International Ltd,Automobile,2
+MPHASIS,Mphasis Ltd,Information Technology,2
+MRF,MRF Ltd,Automobile,2
+MRPL,Mangalore Refinery and Petrochemicals Ltd,Energy,2
+MUTHOOTFIN,Muthoot Finance Ltd,Financial Services,2
+NATIONALUM,National Aluminium Company Ltd,Metals,2
+NAUKRI,Info Edge India Ltd,Consumer Services,2
+NAVINFLUOR,Navin Fluorine International Ltd,Chemicals,2
+NBCC,NBCC India Ltd,Construction,2
+NCC,NCC Ltd,Construction,2
+NEOGEN,Neogen Chemicals Ltd,Chemicals,2
+NH,Narayana Hrudayalaya Ltd,Healthcare,2
+NHPC,NHPC Ltd,Power,2
+NIACL,New India Assurance Company Ltd,Financial Services,2
+NLCINDIA,NLC India Ltd,Power,2
+NMDC,NMDC Ltd,Metals,2
+NUVOCO,Nuvoco Vistas Corp Ltd,Cement,2
+NYKAA,FSN E-Commerce Ventures Ltd,Consumer Services,2
+OBEROIRLTY,Oberoi Realty Ltd,Realty,2
+ORIENTCEM,Orient Cement Ltd,Cement,2
+PAGEIND,Page Industries Ltd,Textiles,2
+PARAS,Paras Defence and Space Technologies Ltd,Industrial Manufacturing,2
+PAYTM,One97 Communications Ltd,Consumer Services,2
+PERSISTENT,Persistent Systems Ltd,Information Technology,2
+PETRONET,Petronet LNG Ltd,Energy,2
+PFC,Power Finance Corporation Ltd,Financial Services,2
+PGHH,Procter and Gamble Hygiene and Health Care Ltd,Fast Moving Consumer Goods,2
+PHOENIXLTD,Phoenix Mills Ltd,Realty,2
+PIDILITIND,Pidilite Industries Ltd,Chemicals,2
+PNB,Punjab National Bank,Financial Services,2
+PNBHOUSING,PNB Housing Finance Ltd,Financial Services,2
+POLICYBZR,PB Fintech Ltd,Consumer Services,2
+POLYCAB,Polycab India Ltd,Industrial Manufacturing,2
+PRESTIGE,Prestige Estates Projects Ltd,Realty,2
+PVRINOX,PVR INOX Ltd,Media,2
+RAINBOW,Rainbow Childrens Medicare Ltd,Healthcare,2
+RAMCOCEM,Ramco Cements Ltd,Cement,2
+RATNAMANI,Ratnamani Metals and Tubes Ltd,Metals,2
+RAYMOND,Raymond Lifestyle Ltd,Textiles,2
+RBLBANK,RBL Bank Ltd,Financial Services,2
+RECLTD,REC Ltd,Financial Services,2
+RELAXO,Relaxo Footwears Ltd,Consumer Durables,2
+ROSSARI,Rossari Biotech Ltd,Chemicals,2
+RVNL,Rail Vikas Nigam Ltd,Construction,2
+SAGARCEM,Sagar Cements Ltd,Cement,2
+SAIL,Steel Authority of India Ltd,Metals,2
+SAMIL,Sona BLW Precision Forgings Ltd,Automobile,2
+SAPPHIRE,Sapphire Foods India Ltd,Consumer Services,2
+SBICARD,SBI Cards and Payment Services Ltd,Financial Services,2
+SHREECEM,Shree Cement Ltd,Cement,2
+SIEMENS,Siemens Ltd,Industrial Manufacturing,2
+SJVN,SJVN Ltd,Power,2
+SOBHA,Sobha Ltd,Realty,2
+SRF,SRF Ltd,Chemicals,2
+STARCEMENT,Star Cement Ltd,Cement,2
+SUBROS,Subros Ltd,Automobile,2
+SUDARSCHEM,Sudarshan Chemical Industries Ltd,Chemicals,2
+SUNDARMFIN,Sundaram Finance Ltd,Financial Services,2
+SUNDRMFAST,Sundram Fasteners Ltd,Automobile,2
+SUNTECK,Sunteck Realty Ltd,Realty,2
+SUNTV,Sun TV Network Ltd,Media,2
+SURYAROSNI,Surya Roshni Ltd,Metals,2
+SUZLON,Suzlon Energy Ltd,Power,2
+SYNGENE,Syngene International Ltd,Healthcare,2
+TANLA,Tanla Platforms Ltd,Information Technology,2
+TARSONS,Tarsons Products Ltd,Healthcare,2
+TATACHEM,Tata Chemicals Ltd,Chemicals,2
+TATACOMM,Tata Communications Ltd,Telecommunication,2
+TATAELXSI,Tata Elxsi Ltd,Information Technology,2
+TATAINVEST,Tata Investment Corporation Ltd,Financial Services,2
+TATAPOWER,Tata Power Company Ltd,Power,2
+TATVA,Tatva Chintan Pharma Chem Ltd,Chemicals,2
+TEJASNET,Tejas Networks Ltd,Telecommunication,2
+TORNTPHARM,Torrent Pharmaceuticals Ltd,Healthcare,2
+TORNTPOWER,Torrent Power Ltd,Power,2
+TRIDENT,Trident Ltd,Textiles,2
+TVSMOTOR,TVS Motor Company Ltd,Automobile,2
+UCOBANK,UCO Bank,Financial Services,2
+UNIONBANK,Union Bank of India,Financial Services,2
+UNITDSPR,United Spirits Ltd,Fast Moving Consumer Goods,2
+VBL,Varun Beverages Ltd,Fast Moving Consumer Goods,2
+VEDL,Vedanta Ltd,Metals,2
+VIJAYA,Vijaya Diagnostic Centre Ltd,Healthcare,2
+VINATI,Vinati Organics Ltd,Chemicals,2
+VIPIND,VIP Industries Ltd,Consumer Durables,2
+VOLTAS,Voltas Ltd,Consumer Durables,2
+VTL,Vardhman Textiles Ltd,Textiles,2
+WELCORP,Welspun Corp Ltd,Metals,2
+WELSPUNLIV,Welspun Living Ltd,Textiles,2
+WESTLIFE,Westlife Foodworld Ltd,Consumer Services,2
+WHIRLPOOL,Whirlpool of India Ltd,Consumer Durables,2
+ZEEL,Zee Entertainment Enterprises Ltd,Media,2
+ZFCVINDIA,ZF Commercial Vehicle Control Systems India Ltd,Automobile,2
+ZOMATO,Eternal Ltd,Consumer Services,2
+ZYDUSLIFE,Zydus Lifesciences Ltd,Healthcare,2

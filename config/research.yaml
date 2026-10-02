@@ -1,0 +1,257 @@
+# =============================================================================
+# RESEARCH / SELF-IMPROVEMENT CONFIGURATION
+#
+# Champion -> Challenger -> Validation -> Promotion.
+# The AI can PROPOSE. A deterministic validation engine DECIDES.
+# =============================================================================
+
+# ------------------------------------------------------------- one variable rule
+one_variable_rule:
+  enforce: true
+  max_variables_per_experiment: 1
+  # If a proposal would change more than one primary variable it is rejected
+  # outright with reason "MULTI_VARIABLE_EXPERIMENT".
+
+# --------------------------------------------------------- data split / holdout
+splits:
+  # Chronological ONLY. Time-series data is NEVER randomly shuffled.
+  scheme: "walk_forward_anchored"
+  train_fraction: 0.55
+  validation_fraction: 0.20
+  test_fraction: 0.15
+  holdout_fraction: 0.10
+  embargo_days: 5              # gap between adjacent windows (leakage control)
+  purge_days: 3                # purge labels that overlap the boundary
+  min_train_days: 90
+  min_test_days: 30
+  holdout_is_final: true
+  # The AI researcher cannot read holdout results until a candidate is finalised.
+  holdout_locked_until_status: "VALIDATED_ON_TEST"
+
+walk_forward:
+  n_windows: 6
+  window_mode: "anchored"      # anchored | rolling
+  min_windows_profitable_pct: 0.60
+  max_windows_worse_than_champion_pct: 0.34
+
+# ------------------------------------------------------------------- cadence
+cadence:
+  trade_level: "journal_only"        # never change strategy after one loss
+  daily: "performance_analysis"
+  weekly: "generate_hypotheses"
+  weekly_or_periodic: "test_challengers"
+  hypothesis_generation_weekday: 6   # Sunday
+  experiment_run_weekday: 6
+  min_trades_between_experiments: 20
+  max_experiments_per_week: 3
+  cooldown_hours_after_rejection: 24
+
+# ------------------------------------------------------------- promotion gate
+# Configurable, NOT hard-coded forever. Every requirement must pass.
+promotion_gate:
+  min_trades: 200
+  min_trades_soft: 60               # below this -> INSUFFICIENT_SAMPLE, not a fail
+  require_positive_expectancy: true
+  min_expectancy_r: 0.05
+  min_profit_factor: 1.30
+  max_drawdown_pct: 0.15
+  require_sortino_better_than_champion: true
+  require_risk_adjusted_better_than_champion: true
+  require_cost_adjusted_positive: true
+  max_single_stock_pnl_share: 0.35      # not dependent on one stock
+  max_single_day_pnl_share: 0.30        # not dependent on one day
+  max_single_regime_pnl_share: 0.60     # not dependent on one regime
+  min_walk_forward_profitable_windows_pct: 0.60
+  holdout_must_pass: true
+  min_holdout_profit_factor: 1.10
+  max_montecarlo_ruin_probability: 0.02
+  max_montecarlo_p95_drawdown_pct: 0.25
+  min_paper_trades: 30
+  min_paper_days: 10
+  require_paper_expectancy_positive: true
+  improvement_significance:
+    test: "bootstrap"
+    n_bootstrap: 2000
+    min_probability_better: 0.75
+    min_delta_expectancy_r: 0.02
+    min_delta_sortino: 0.05
+
+# -------------------------------------------------------------- robustness tests
+robustness:
+  enabled: true
+  parameter_perturbation_pct: 0.10      # +/-10% on the changed variable
+  perturbed_runs_must_be_profitable_pct: 0.70
+  slippage_multiplier: 2.0
+  fees_multiplier: 1.5
+  delayed_entry_candles: 1
+  worse_fill_bps: 10
+  missed_trade_pct: 0.10
+  random_trade_removal_pct: 0.20
+  random_removal_runs: 20
+  max_metric_degradation_pct: 0.40      # collapse threshold
+  different_regimes_required: 2
+  different_months_required: 4
+
+montecarlo:
+  enabled: true
+  n_simulations: 2000
+  method: "trade_sequence_resample"     # bootstrap of realised trade R-multiples
+  report_percentiles: [5, 25, 50, 75, 95]
+  ruin_threshold_pct: 0.30
+
+# ------------------------------------------------------------- objective function
+# DO NOT optimise for maximum profit.
+objective:
+  weights:
+    sortino: 0.25
+    expectancy: 0.20
+    profit_factor: 0.15
+    return: 0.15
+    walk_forward_stability: 0.10
+    regime_robustness: 0.10
+    max_drawdown: -0.20
+    turnover_cost: -0.05
+  normalisation: "robust_z"       # rank-based, outlier resistant
+  hard_constraints_override_score: true
+
+# -------------------------------------------------------------- multiple testing
+multiple_testing:
+  # Prevent "run 10,000 combinations and keep the luckiest".
+  track_trial_count: true
+  deflated_sharpe: true
+  haircut_method: "bonferroni_like"
+  trials_penalty_start: 10          # after N trials, require stronger evidence
+  trials_penalty_slope: 0.02        # +2% required edge per additional trial
+  max_trials_per_quarter: 60
+  max_trials_per_year: 180
+  on_budget_exhausted: "pause_and_alert"
+  prefer_simple_over_optimised: true
+
+# ----------------------------------------------------------- anti-overfitting
+anti_overfitting:
+  reject_if:
+    requires_precise_parameters: true     # fails perturbation test
+    works_on_single_stock: true
+    works_on_single_month: true
+    depends_on_few_giant_winners: true    # top-3 trades > 60% of net PnL
+    collapses_after_costs: true
+    collapses_with_worse_slippage: true
+    poor_out_of_sample: true
+    inadequate_sample_size: true
+    excessive_turnover: true
+    unstable_walk_forward: true
+  max_top3_trade_pnl_share: 0.60
+  max_turnover_per_day: 4.0
+
+# --------------------------------------------------------------- versioning
+versioning:
+  scheme: "semver"                 # ORB_vMAJOR.MINOR.PATCH
+  immutable_after_publish: true
+  bump_rules:
+    patch: "single-parameter retune"
+    minor: "new filter or rule"
+    major: "structural strategy change"
+  record_git_commit: true
+  record_parent: true
+
+# --------------------------------------------------------------- memory
+memory:
+  backend: "database"              # persistent structured memory, not chat history
+  store_hypotheses: true
+  store_learnings: true
+  store_experiments: true
+  link_graph: true                 # STRATEGY->EXPERIMENT->CONDITION->TRADES->RESULT->LESSON
+  max_learnings: 100000
+  retrieval_top_k: 12
+
+# --------------------------------------------------------------- hypothesis seeds
+# Deterministic hypothesis templates the researcher evaluates against the journal.
+# The AI may add more; these guarantee the loop works without any LLM at all.
+hypothesis_templates:
+  - id: "rvol_threshold"
+    variable: "long.min_rvol"
+    description: "Relative-volume entry threshold"
+    search: [1.05, 1.20, 1.35, 1.50, 1.75]
+  - id: "orb_duration"
+    variable: "opening_range.duration_minutes"
+    description: "Opening range length"
+    search: [5, 10, 15, 20, 30]
+  - id: "retest_required"
+    variable: "long.require_retest"
+    description: "Require a successful retest of the breakout level"
+    search: [false, true]
+  - id: "index_vwap_filter"
+    variable: "long.require_index_above_vwap"
+    description: "Require NIFTY above its session VWAP for longs"
+    search: [false, true]
+  - id: "sector_rank_gate"
+    variable: "long.require_sector_rank_at_least"
+    description: "Only trade in the strongest N sectors"
+    search: [10, 6, 4, 3]
+  - id: "entry_window_start"
+    variable: "long.entry_window_start_minutes"
+    description: "Earliest minute after the open at which entries are allowed"
+    search: [15, 20, 30, 45]
+  - id: "entry_window_end"
+    variable: "long.entry_window_end_minutes"
+    description: "Latest minute after the open at which entries are allowed"
+    search: [210, 180, 150, 120]
+  - id: "stop_model"
+    variable: "stops.model"
+    description: "Stop-loss model"
+    search: ["orb_structural", "atr", "swing", "pct"]
+  - id: "atr_stop_multiplier"
+    variable: "stops.atr_multiplier"
+    description: "ATR stop distance multiplier"
+    search: [1.0, 1.5, 2.0, 2.5]
+  - id: "target_r_multiple"
+    variable: "targets.r_multiple_t1"
+    description: "First target as a multiple of initial risk"
+    search: [1.25, 1.5, 2.0, 2.5]
+  - id: "vix_block"
+    variable: "no_trade.vix_block_above"
+    description: "India VIX level above which no new trades are taken"
+    search: [35.0, 30.0, 25.0, 20.0]
+  - id: "max_spread"
+    variable: "long.max_spread_pct"
+    description: "Maximum acceptable bid-ask spread for entry"
+    search: [0.0050, 0.0035, 0.0025, 0.0015]
+  - id: "min_or_width_atr"
+    variable: "opening_range.min_or_width_atr_fraction"
+    description: "Minimum opening-range width as a fraction of ATR"
+    search: [0.08, 0.10, 0.15, 0.22]
+  - id: "max_or_width_atr"
+    variable: "opening_range.max_or_width_atr_fraction"
+    description: "Maximum opening-range width as a fraction of ATR"
+    search: [0.50, 0.60, 0.80, 1.00]
+  - id: "time_stop"
+    variable: "exits.time_stop_minutes"
+    description: "Time-based exit for stalled trades"
+    search: [90, 120, 180, 240]
+  - id: "short_enabled"
+    variable: "short.enabled"
+    description: "Whether the short side is traded at all"
+    search: [true, false]
+
+# ----------------------------------------------------------------- LLM role
+llm:
+  # The LLM may summarise, analyse journals, read news, propose hypotheses and
+  # explain signals. It may NOT place trades, change live strategy, alter risk
+  # limits, declare a candidate successful, or fabricate data.
+  enabled_for:
+    - "market_condition_summary"
+    - "trade_journal_analysis"
+    - "news_classification"
+    - "hypothesis_proposal"
+    - "signal_explanation"
+    - "daily_report"
+  forbidden:
+    - "bypass_risk_engine"
+    - "modify_live_strategy"
+    - "increase_leverage"
+    - "declare_candidate_successful"
+    - "fabricate_market_data"
+    - "place_orders"
+  fallback: "deterministic_rules"   # if no LLM is configured the loop still runs
+  max_tokens: 1200
+  temperature: 0.2

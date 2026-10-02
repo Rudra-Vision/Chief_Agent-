@@ -1,0 +1,228 @@
+# =============================================================================
+# BROKER CONFIGURATION  -  Upstox
+#
+# Every endpoint below was taken from the CURRENT official Upstox developer
+# documentation (https://upstox.com/developer/api-documentation/) and is
+# reproduced here as a single auditable reference. Do not "invent" endpoints.
+#
+# Secrets live in environment variables only. See .env.example.
+# =============================================================================
+
+provider: "upstox"
+
+base_urls:
+  rest: "https://api.upstox.com"
+  hft: "https://api-hft.upstox.com"          # documented for Place Order V3
+  sandbox: "https://sandbox.upstox.com"      # place/modify/cancel only
+  assets: "https://assets.upstox.com"        # instrument masters, proto file
+
+api_version_header: "2.0"
+
+# --------------------------------------------------------------- authentication
+auth:
+  authorize_dialog: "GET /v2/login/authorization/dialog"
+  token_exchange: "POST /v2/login/authorization/token"
+  logout: "POST /v2/logout"
+  # OAuth2 authorization-code flow. client_id = API key, client_secret = API secret.
+  grant_type: "authorization_code"
+  response_type: "code"
+  # The access token must be regenerated daily. The analytics token is generated
+  # once and powers Market Data + Realtime/Streaming APIs.
+  daily_token_expiry: true
+
+# -------------------------------------------------------------------- endpoints
+endpoints:
+  market_data:
+    ltp_v3: "GET /v3/market-quote/ltp"
+    ohlc_v3: "GET /v3/market-quote/ohlc"
+    full_v3: "GET /v3/market-quote/full"
+    quotes_v2: "GET /v2/market-quote/quotes"
+    historical_v3: "GET /v3/historical-candle/{instrument_key}/{unit}/{interval}/{to_date}/{from_date}"
+    intraday_v3: "GET /v3/historical-candle/intraday/{instrument_key}/{unit}/{interval}"
+    historical_v2: "GET /v2/historical-candle/{instrument_key}/{interval}/{to_date}/{from_date}"
+    intraday_v2: "GET /v2/historical-candle/intraday/{instrument_key}/{interval}"
+    option_chain: "GET /v2/option/chain"
+    option_contracts: "GET /v2/option/contract"
+    option_greeks: "GET /v2/option/greek"
+    news: "GET /v2/news"
+  orders:
+    place_v3: "POST /v3/order/place"
+    modify_v3: "PUT /v3/order/modify"
+    cancel_v3: "DELETE /v3/order/cancel"
+    place_v2: "POST /v2/order/place"
+    modify_v2: "PUT /v2/order/modify"
+    cancel_v2: "DELETE /v2/order/cancel"
+    place_multi: "POST /v2/order/multi/place"
+    cancel_multi: "DELETE /v2/order/multi/cancel"
+    exit_all_positions: "POST /v2/order/positions/exit"
+    order_book: "GET /v2/order/retrieve-all"
+    order_status: "GET /v2/order/details"
+    order_history: "GET /v2/order/history"
+    trades_for_day: "GET /v2/order/trades/get-trades-for-day"
+    trades_by_order: "GET /v2/order/trades"
+    gtt_place: "POST /v3/order/gtt/place"
+    gtt_modify: "PUT /v3/order/gtt/modify"
+    gtt_cancel: "DELETE /v3/order/gtt/cancel"
+    gtt_list: "GET /v3/order/gtt/list"
+  portfolio:
+    positions: "GET /v2/portfolio/short-term-positions"
+    holdings: "GET /v2/portfolio/long-term-holdings"
+    convert_position: "PUT /v2/portfolio/convert-position"
+    margin_required: "POST /v2/portfolio/margin-required"
+  user:
+    profile: "GET /v2/user/profile"
+    funds_and_margin: "GET /v2/user/get-funds-and-margin"
+    kill_switch: "POST /v2/user/kill-switch"
+    static_ips: "PUT /v2/user/ip"
+  market_info:
+    holidays: "GET /v2/market/holidays"
+    holiday_by_date: "GET /v2/market/holidays/{date}"
+    timings_by_date: "GET /v2/market/timings/{date}"
+    exchange_status: "GET /v2/market/status/{exchange}"
+  websocket:
+    market_feed_authorize_v3: "GET /v3/feed/market-data-feed/authorize"
+    market_feed_v3: "WSS /feed/market-data-feed"
+    portfolio_stream_authorize: "GET /v2/feed/portfolio-stream-feed/authorize"
+    portfolio_stream: "WSS /feed/portfolio-stream-feed"
+
+# ------------------------------------------------------------- instrument master
+instruments:
+  # JSON is preferred over CSV per Upstox guidance (more robust, future-proof).
+  nse: "https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz"
+  complete: "https://assets.upstox.com/market-quote/instruments/exchange/complete.json.gz"
+  global: "https://assets.upstox.com/market-quote/instruments/exchange/global.json.gz"
+  suspended: "https://assets.upstox.com/market-quote/instruments/exchange/suspended-instrument.json.gz"
+  mis_nse: "https://assets.upstox.com/market-quote/instruments/exchange/NSE_MIS.json.gz"
+  refresh_daily: true
+  # instrument_key is canonical. exchange_token may be REUSED by the exchange
+  # after expiry, so it is never used as a durable identifier.
+  canonical_identifier: "instrument_key"
+
+websocket:
+  proto_url: "https://assets.upstox.com/feed/market-data-feed/v3/MarketDataFeed.proto"
+  encoding: "protobuf"
+  binary_requests: true
+  default_mode: "full"
+  # Documented V3 limits (normal plan): 2 connections per user;
+  # LTPC 5000 keys (2000 combined), Option Greeks 3000 (2000 combined),
+  # Full 2000 (1500 combined). We stay far below these.
+  max_connections: 2
+  max_full_subscriptions: 1500
+  max_ltpc_subscriptions: 2000
+  subscription_chunk_size: 100
+  ping_interval_seconds: 25
+  reconnect_initial_backoff_seconds: 1
+  reconnect_max_backoff_seconds: 60
+  reconnect_jitter: true
+
+# ------------------------------------------------------------------ rate limits
+# From the official Rate Limits page. The system must never intentionally
+# bypass broker or exchange limits.
+rate_limits:
+  order_placement:                # regular algos (no SEBI algo registration)
+    per_second: 10
+    per_minute: 500
+    per_30_minutes: 2000
+  order_placement_registered_algo:
+    per_second: 50
+    per_minute: 500
+    per_30_minutes: 2000
+  standard:                       # holdings, positions, funds, historical candles...
+    per_second: 50
+    per_minute: 500
+    per_30_minutes: 2000
+  payout_standard:
+    per_second: 10
+    per_minute: 500
+    per_30_minutes: 2000
+  safety_factor: 0.7              # we only use 70% of the published budget
+
+# --------------------------------------------------- historical candle retrieval
+# Documented availability and per-request windows for Historical Candle Data V3.
+historical:
+  minutes:
+    intervals: "1..300"
+    available_from: "2022-01-01"
+    max_window_for_interval_lte_15: "1 month"
+    max_window_for_interval_gt_15: "1 quarter"
+  hours:
+    intervals: "1..5"
+    available_from: "2022-01-01"
+    max_window: "1 quarter"
+  days:
+    intervals: "1"
+    available_from: "2000-01-01"
+    max_window: "1 decade"
+  weeks:
+    intervals: "1"
+    available_from: "2000-01-01"
+    max_window: "unlimited"
+  months:
+    intervals: "1"
+    available_from: "2000-01-01"
+    max_window: "unlimited"
+  # Never re-request data we already have - the cache is authoritative.
+  cache_first: true
+  request_pause_seconds: 0.25
+  max_retries: 3
+
+# -------------------------------------------------------------------- kill switch
+kill_switch:
+  endpoint: "POST /v2/user/kill-switch"
+  # Body is an ARRAY of {segment, action}; action is ENABLE or DISABLE.
+  segments: ["NSE_EQ", "NSE_FO"]
+  # Documented platform rules - respected, never worked around:
+  requires_all_positions_closed: true
+  cooling_period_hours: 12
+  cancels_open_orders: true
+  requires_token_regeneration: true
+  # Our internal kill switch is instant and local; the broker kill switch is an
+  # additional, account-level backstop used only in LIVE mode.
+  internal_first: true
+
+static_ip:
+  endpoint: "PUT /v2/user/ip"
+  change_cooldown: "once per calendar week"
+  invalidates_tokens: true
+  enforce_for_live: true
+
+# ------------------------------------------------------------- operating modes
+modes:
+  SANDBOX:
+    description: "Upstox sandbox environment. Supports place/modify/cancel only."
+    base_url: "https://sandbox.upstox.com"
+    token_env: "UPSTOX_SANDBOX_TOKEN"
+    places_real_money_orders: false
+  PAPER:
+    description: "Internal paper-trading engine. No broker order calls at all."
+    places_real_money_orders: false
+  LIVE:
+    description: "Real money. Locked behind the full preflight checklist."
+    base_url: "https://api.upstox.com"
+    order_base_url: "https://api-hft.upstox.com"
+    places_real_money_orders: true
+
+# --------------------------------------------------------------- order defaults
+orders:
+  product: "I"                # I = intraday, D = delivery, MTF = margin funding
+  validity: "DAY"
+  entry_order_type: "LIMIT"   # LIMIT-by-default is safer than MARKET from an API
+  stop_order_type: "SL-M"     # broker-side stop protection
+  exit_order_type: "LIMIT"
+  disclosed_quantity: 0
+  slice: false
+  market_protection: -1       # -1 = automatic per exchange guidelines
+  tag_prefix: "CHIEF"         # order tags carry trade_id for correlation
+  limit_offset_ticks: 5       # protective limit price offset in ticks
+  use_always_for_stops: true
+
+# ------------------------------------------------------------------ simulation
+simulation:
+  # Used by SANDBOX-without-token and PAPER modes.
+  latency_ms_mean: 120
+  latency_ms_stddev: 40
+  slippage_bps: 4
+  spread_bps: 6
+  partial_fill_probability: 0.15
+  rejection_probability: 0.002
+  fill_model: "mid_plus_noise"

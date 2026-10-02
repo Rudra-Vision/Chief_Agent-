@@ -1,0 +1,113 @@
+# ---------------------------------------------------------------------------
+# Chief Agent - local / VPS deployment
+#
+#   docker compose up -d --build
+#   open http://localhost:8000
+#
+# The default profile runs the app alone on SQLite (zero external services).
+# Add PostgreSQL and Redis with:
+#   docker compose --profile postgres --profile redis up -d --build
+# ---------------------------------------------------------------------------
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chief-agent:latest
+    container_name: chief-agent
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/var/chief_agent.db}
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+      # Set to 1 to enable the Redis cache when the redis profile is active.
+      REDIS_URL: ${REDIS_URL:-}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      # Persistent state: the database, the candle cache, backups and the
+      # research artefacts all live here.
+      - chief_agent_var:/app/var
+      - ./research_data:/app/research_data
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_healthy
+        required: false
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: chief-agent-db
+    restart: unless-stopped
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chief}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-chief_agent}
+    volumes:
+      - chief_agent_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chief} -d ${POSTGRES_DB:-chief_agent}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: chief-agent-redis
+    restart: unless-stopped
+    profiles: ["redis"]
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - chief_agent_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+  # Development dashboard with hot reload (not for production).
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: chief-agent-frontend-dev
+    restart: unless-stopped
+    profiles: ["dev"]
+    environment:
+      VITE_API_TARGET: http://app:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - app
+
+volumes:
+  chief_agent_var:
+  chief_agent_pgdata:
+  chief_agent_redis:

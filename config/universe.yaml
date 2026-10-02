@@ -1,0 +1,48 @@
+# =============================================================================
+# MARKET UNIVERSE
+# Phase 1: highly liquid NSE equities only. No illiquid small caps.
+# The architecture supports derivatives later (see `future_segments`).
+# =============================================================================
+
+exchange: "NSE"
+segment: "NSE_EQ"
+instrument_type: "EQ"
+
+# Indices used for regime, relative strength and sector context.
+benchmarks:
+  market_index_key: "NSE_INDEX|Nifty 50"
+  market_index_symbol: "NIFTY 50"
+  volatility_index_key: "NSE_INDEX|India VIX"
+  volatility_index_symbol: "India VIX"
+  secondary_indices:
+    - "NSE_INDEX|Nifty Bank"
+    - "NSE_INDEX|Nifty IT"
+    - "NSE_INDEX|Nifty Next 50"
+
+# Where the constituent lists come from.
+# `bundled` uses the static file shipped with the repo (works offline).
+# `upstox` refreshes from the BOD instrument master + index constituents API.
+source: "bundled"
+bundled_constituents_file: "config/universe_nifty.csv"
+
+# Hard caps so a single scan can never explode API usage.
+limits:
+  max_universe_size: 120
+  max_scan_batch: 100          # <= 500 per market-quote call, kept low on purpose
+  max_websocket_subscriptions: 400
+  refresh_instruments_daily: true
+
+# Liquidity filters applied before an instrument is allowed into the scan set.
+liquidity:
+  min_average_daily_volume: 200000
+  min_average_daily_turnover_inr: 50000000
+  min_price_inr: 20
+  max_price_inr: 20000
+  min_spread_quality_pct: 0.004
+
+# Derivatives are modelled but DISABLED in the first release.
+future_segments:
+  nse_index_futures: false
+  nse_stock_futures: false
+  nse_index_options: false
+  nse_stock_options: false
