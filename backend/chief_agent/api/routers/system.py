@@ -43,7 +43,10 @@ def mode(state: AppState = Depends(get_app_state)) -> Dict[str, Any]:
 def status(state: AppState = Depends(get_app_state)) -> Dict[str, Any]:
     settings = get_settings()
     try:
-        portfolio = state.portfolio.update_from_paper(state.paper)
+        # .to_dict() (not the raw dataclass) so the computed fields the dashboard
+        # relies on - daily_return_pct, drawdown_pct, open_position_count - are
+        # actually present in the JSON.
+        portfolio = state.portfolio.update_from_paper(state.paper).to_dict()
     except Exception as exc:  # pragma: no cover - defensive
         log.warning("portfolio update failed", context={"error": str(exc)})
         portfolio = state.portfolio.snapshot()

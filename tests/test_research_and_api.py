@@ -407,6 +407,32 @@ class TestApi:
         assert payload["mode"]["is_live"] is False
         assert payload["data"]["is_simulated"] in (True, False)
 
+    def test_status_payload_has_every_field_the_dashboard_reads(self, fastapi_client):
+        payload = fastapi_client.get("/api/system/status").json()
+        portfolio = payload["portfolio"]
+        for field in (
+            "equity",
+            "cash",
+            "realized_pnl_today",
+            "unrealized_pnl",
+            "daily_return_pct",
+            "peak_equity",
+            "drawdown_pct",
+            "open_risk_pct",
+            "gross_exposure_pct",
+            "open_position_count",
+            "open_positions",
+        ):
+            assert field in portfolio, f"the dashboard reads portfolio.{field}"
+        for field in ("mode", "banner", "is_live", "is_simulated", "live_blocked_reasons", "deployment_stage"):
+            assert field in payload["mode"], f"the dashboard reads mode.{field}"
+        for field in ("version", "family", "config_hash"):
+            assert field in payload["strategy"]
+        for field in ("source", "is_simulated", "data_safe_mode"):
+            assert field in payload["data"]
+        for field in ("engaged", "reason"):
+            assert field in payload["kill_switch"]
+
     def test_no_secret_is_ever_returned(self, fastapi_client, monkeypatch):
         from chief_agent import settings as settings_module
 
